@@ -5,6 +5,7 @@ import {defineConfig} from 'vite';
 
 export default defineConfig(() => {
   return {
+    base: '/bta3-ai-lab/',
     plugins: [react(), tailwindcss()],
     resolve: {
       alias: {

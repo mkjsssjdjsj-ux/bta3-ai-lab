@@ -25,14 +25,30 @@ import {
 import { ActiveSection, AIUpdate, PromptItem, VisualItem, VideoItem, SocialPost, MohamedKhaledLink, ContactDetails } from './types';
 import { motion, AnimatePresence } from 'motion/react';
 
+const getRelativePath = (path: string): string => {
+  if (path.startsWith('/bta3-ai-lab')) {
+    const rel = path.substring('/bta3-ai-lab'.length);
+    return rel === '' ? '/' : rel;
+  }
+  return path;
+};
+
+const getFullPath = (relPath: string): string => {
+  if (window.location.pathname.startsWith('/bta3-ai-lab')) {
+    return '/bta3-ai-lab' + (relPath === '/' ? '' : relPath);
+  }
+  return relPath;
+};
+
 const pathToSection = (path: string): ActiveSection => {
-  if (path === '/posts') return 'posts';
-  if (path === '/prompts') return 'prompts';
-  if (path === '/ai-updates') return 'updates';
-  if (path === '/connect') return 'connect';
-  if (path === '/visuals') return 'visuals';
-  if (path === '/videos') return 'videos';
-  if (path === '/portfolio') return 'portfolio';
+  const rel = getRelativePath(path);
+  if (rel === '/posts') return 'posts';
+  if (rel === '/prompts') return 'prompts';
+  if (rel === '/ai-updates') return 'updates';
+  if (rel === '/connect') return 'connect';
+  if (rel === '/visuals') return 'visuals';
+  if (rel === '/videos') return 'videos';
+  if (rel === '/portfolio') return 'portfolio';
   return 'home';
 };
 
@@ -44,14 +60,14 @@ const sectionToPath = (section: ActiveSection): string => {
 
 function Dashboard() {
   const { lang, dir } = useTranslation();
-  const [currentPath, setCurrentPath] = useState(() => window.location.pathname);
+  const [currentPath, setCurrentPath] = useState(() => getRelativePath(window.location.pathname));
   const [activeSection, setActiveSection] = useState<ActiveSection>(() => pathToSection(window.location.pathname));
 
   // Monitor URL changes (history popstate / pushed state)
   useEffect(() => {
     const handleLocationChange = () => {
       const path = window.location.pathname;
-      setCurrentPath(path);
+      setCurrentPath(getRelativePath(path));
       setActiveSection(pathToSection(path));
     };
     window.addEventListener('popstate', handleLocationChange);
@@ -62,17 +78,19 @@ function Dashboard() {
 
   // Sync URL bar when state is modified programmatically (Navbar, Hero buttons, etc.)
   useEffect(() => {
-    const expectedPath = sectionToPath(activeSection);
-    if (window.location.pathname !== expectedPath && currentPath !== '/admin') {
-      window.history.pushState(null, '', expectedPath);
-      setCurrentPath(expectedPath);
+    const expectedRelPath = sectionToPath(activeSection);
+    const expectedFullPath = getFullPath(expectedRelPath);
+    if (window.location.pathname !== expectedFullPath && currentPath !== '/admin') {
+      window.history.pushState(null, '', expectedFullPath);
+      setCurrentPath(expectedRelPath);
     }
   }, [activeSection, currentPath]);
 
-  const navigateTo = (path: string) => {
-    window.history.pushState(null, '', path);
-    setCurrentPath(path);
-    setActiveSection(pathToSection(path));
+  const navigateTo = (relPath: string) => {
+    const fullPath = getFullPath(relPath);
+    window.history.pushState(null, '', fullPath);
+    setCurrentPath(relPath);
+    setActiveSection(pathToSection(relPath));
   };
 
   // Core content states, loaded from localStorage or falling back to default pre-populated records
