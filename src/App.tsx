@@ -35,7 +35,7 @@ const getRelativePath = (path: string): string => {
 
 const getFullPath = (relPath: string): string => {
   if (window.location.pathname.startsWith('/bta3-ai-lab')) {
-    return '/bta3-ai-lab' + (relPath === '/' ? '' : relPath);
+    return '/bta3-ai-lab' + (relPath === '/' ? '/' : relPath);
   }
   return relPath;
 };
